@@ -1,4 +1,6 @@
 package com.work.SecureShop.service;
+
+import java.util.HashSet;
 import java.util.Set;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +21,7 @@ import com.work.SecureShop.repository.UserEntityRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -40,7 +43,12 @@ public class AuthService {
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
-        user.setRoles(Set.of(Role.ROLE_USER));
+        
+        // 🚀 FIX: Modifiable HashSet use kiya taaki Hibernate state updates crash na karein
+        Set<Role> roles = new HashSet<>();
+        roles.add(Role.ROLE_USER);
+        user.setRoles(roles);
+        
         userRepository.save(user);
         return new ApiResponse(true, "User registered successfully!");
     }
